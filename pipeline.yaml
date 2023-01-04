@@ -312,7 +312,7 @@ Resources:
             MaxAge: 3000
       LoggingConfiguration:
         DestinationBucketName: logspipeline
-        LogFilePrefix: !Sub "test/documents"
+        LogFilePrefix: !Sub "test/documentos"
 
   # Code Pipeline.
   Pipeline:
