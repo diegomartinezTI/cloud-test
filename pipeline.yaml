@@ -34,7 +34,7 @@ Parameters:
 Conditions:
   CreateBucketArtifacts: !Equals
     - !Ref BucketArtifactName
-    - "----"
+    - "-"
 
 Resources:
   RoleCloudFormation:
