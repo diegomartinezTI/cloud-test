@@ -1,0 +1,109 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: ""
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+  ArtifactsBucket:
+    Type: String
+  AppName:
+    Type: String
+    Description: App Name.
+    Default: test
+  Country:
+    Type: String
+    Default: mx
+  FolderCountry:
+    Type: String
+  DomainNameUser:
+    Type: AWS::SSM::Parameter::Value<String>
+  DomainNameInternal:
+    Type: AWS::SSM::Parameter::Value<String>
+  DomainNameFrontAdmin:
+    Type: AWS::SSM::Parameter::Value<String>
+  DomainNameFrontUsers:
+    Type: AWS::SSM::Parameter::Value<String>
+  MtsHost:
+    Type: String
+  SubnetsIds:
+    Type: String
+  SecurityGroup:
+    Type: String
+  AllResources:
+    Type: String
+    Default: "*"
+  ImageValue:
+    Type: String
+    Default: "-"
+  VersionPsyco:
+    Type: String
+Conditions:
+  noDeploy: !Not
+    - !Equals
+      - noDeploy
+      - noDeploy
+Resources:
+  ROLLambda:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:  
+        - PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:*
+                  - s3-object-lambda:*
+                Resource: !Sub "arn:aws:s3:::ebs-configs-${AWS::AccountId}/*"
+          PolicyName: !Sub "${Environment}-${Country}-${AppName}-configBucketPermission" 
+        - PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetResourcePolicy
+                  - secretsmanager:GetSecretValue
+                  - secretsmanager:DescribeSecret
+                  - secretsmanager:ListSecretVersionIds
+                Resource: !Sub "arn:aws:secretsmanager:*:${AWS::AccountId}:secret:*"
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetRandomPassword
+                  - secretsmanager:ListSecrets
+                Resource: !Ref AllResources
+          PolicyName: !Sub "${Environment}-${Country}-${AppName}-lambdaSecretsManagerPermission"
+        - PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - xray:PutTraceSegments
+                  - xray:PutTelemetryRecords
+                Resource: !Ref "AllResources"
+          PolicyName: !Sub "${Environment}-${Country}-${AppName}-x-ray-access"
+ 
+  StackParameters:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./parameters.yaml
+      Parameters:
+        Environment: !Ref "Environment"
+        Country: !Ref "Country"
+        AppName: !Ref "AppName"
+      TimeoutInMinutes: 60
+  StackUserLambdas:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./lambdasUser.json
+      Parameters:
+        Environment: !Ref "Environment"
+      TimeoutInMinutes: 60
+ 

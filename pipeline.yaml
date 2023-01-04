@@ -1,0 +1,409 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: Cognito User Pool & Clients for Authentication
+
+Parameters:
+  email:
+    Type: String
+    Default: diego_lin222@hotmail.com
+  ArtifactName:
+    Type: String
+    Default: projectTemplate.zip
+  AppName:
+    Type: String
+    Default: test
+  BucketArtifactName:
+    Type: String
+    Default: "-"
+  AllResources:
+    Type: String
+    Default: "*"
+  Environment:
+    Type: String
+    Default: "dev"
+  CountryLowercase:
+    Type: String
+    Default: "mx"
+  VersionPsyco:
+    Type: String
+    Default: 2
+  PrincipalTemplate:
+    Type: String
+    Description: Name of the main template in the project.
+    Default: template_cognito.yaml
+Conditions:
+  CreateBucketArtifacts: !Equals
+    - !Ref BucketArtifactName
+    - "-"
+
+Resources:
+  RoleCloudFormation:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: CloudFormation-Role
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AdministratorAccess-AWSElasticBeanstalk"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - cloudformation.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: /
+      Policies:
+        - PolicyName: CloudFormation-Policy
+          PolicyDocument:
+            Statement:
+              - Sid: VisualEditor0
+                Effect: Allow
+                Action:
+                  - "autoscaling:CreateAutoScalingGroup"
+                  - "autoscaling:CreateLaunchConfiguration"
+                  - "autoscaling:DescribeLaunchConfigurations"
+                  - "elasticfilesystem:*"
+                  - "kms:*"
+                  - "acm:*"
+                  - "ecr:*"
+                  - "route53:*"
+                  - "cloudfront:*"
+                  - "appsync:*"
+                  - "waf-regional:*"
+                  - "dynamodb:*"
+                  - "elasticloadbalancing:*"
+                  - "states:*"
+                  - "sqs:*"
+                  - "organizations:ListPoliciesForTarget"
+                  - "organizations:ListRoots"
+                  - "organizations:ListTargetsForPolicy"
+                  - "apigateway:*"
+                  - "waf:*"
+                  - "wafv2:*"
+                  - "secretsmanager:*"
+                  - "organizations:DescribeAccount"
+                  - "cloudformation:CreateChangeSet"
+                  - "cloudformation:CreateStack"
+                  - "cloudformation:DeleteStack"
+                  - "cloudformation:DescribeStacks"
+                  - "cloudformation:DescribeStackEvents"
+                  - "cloudformation:DescribeStackResource"
+                  - "s3:*"
+                  - "organizations:DescribePolicy"
+                  - "organizations:ListChildren"
+                  - "organizations:ListPolicies"
+                  - "iam:*"
+                  - "ssm:*"
+                  - "organizations:DescribeOrganization"
+                  - "codedeploy:*"
+                  - "lambda:*"
+                  - "organizations:DescribeOrganizationalUnit"
+                  - "organizations:ListParents"
+                  - "logs:*"
+                  - "ec2:AcceptVpcPeeringConnection"
+                  - "ec2:AcceptVpcEndpointConnections"
+                  - "ec2:AllocateAddress"
+                  - "ec2:AssignIpv6Addresses"
+                  - "ec2:AssignPrivateIpAddresses"
+                  - "ec2:AssociateAddress"
+                  - "ec2:AssociateDhcpOptions"
+                  - "ec2:AssociateRouteTable"
+                  - "ec2:AssociateSubnetCidrBlock"
+                  - "ec2:AssociateVpcCidrBlock"
+                  - "ec2:AttachClassicLinkVpc"
+                  - "ec2:AttachInternetGateway"
+                  - "ec2:AttachNetworkInterface"
+                  - "ec2:AttachVpnGateway"
+                  - "ec2:AuthorizeSecurityGroupEgress"
+                  - "ec2:AuthorizeSecurityGroupIngress"
+                  - "ec2:CreateCustomerGateway"
+                  - "ec2:CreateDefaultSubnet"
+                  - "ec2:CreateDefaultVpc"
+                  - "ec2:CreateDhcpOptions"
+                  - "ec2:CreateEgressOnlyInternetGateway"
+                  - "ec2:CreateFlowLogs"
+                  - "ec2:CreateInternetGateway"
+                  - "ec2:CreateNatGateway"
+                  - "ec2:CreateNetworkAcl"
+                  - "ec2:CreateNetworkAcl"
+                  - "ec2:CreateNetworkAclEntry"
+                  - "ec2:CreateNetworkInterface"
+                  - "ec2:CreateNetworkInterfacePermission"
+                  - "ec2:CreateRoute"
+                  - "ec2:CreateRouteTable"
+                  - "ec2:CreateSecurityGroup"
+                  - "ec2:CreateSubnet"
+                  - "ec2:CreateTags"
+                  - "ec2:CreateVpc"
+                  - "ec2:CreateVpcEndpoint"
+                  - "ec2:CreateVpcEndpointConnectionNotification"
+                  - "ec2:CreateVpcEndpointServiceConfiguration"
+                  - "ec2:CreateVpcPeeringConnection"
+                  - "ec2:CreateVpnConnection"
+                  - "ec2:CreateVpnConnectionRoute"
+                  - "ec2:CreateVpnGateway"
+                  - "ec2:DeleteCustomerGateway"
+                  - "ec2:DeleteDhcpOptions"
+                  - "ec2:DeleteEgressOnlyInternetGateway"
+                  - "ec2:DeleteFlowLogs"
+                  - "ec2:DeleteInternetGateway"
+                  - "ec2:DeleteNatGateway"
+                  - "ec2:DeleteNetworkAcl"
+                  - "ec2:DeleteNetworkAclEntry"
+                  - "ec2:DeleteNetworkInterface"
+                  - "ec2:DeleteNetworkInterfacePermission"
+                  - "ec2:DeleteRoute"
+                  - "ec2:DeleteRouteTable"
+                  - "ec2:DeleteSecurityGroup"
+                  - "ec2:DeleteSubnet"
+                  - "ec2:DeleteTags"
+                  - "ec2:DeleteVpc"
+                  - "ec2:DeleteVpcEndpoints"
+                  - "ec2:DeleteVpcEndpointConnectionNotifications"
+                  - "ec2:DeleteVpcEndpointServiceConfigurations"
+                  - "ec2:DeleteVpcPeeringConnection"
+                  - "ec2:DeleteVpnConnection"
+                  - "ec2:DeleteVpnConnectionRoute"
+                  - "ec2:DeleteVpnGateway"
+                  - "ec2:DescribeAccountAttributes"
+                  - "ec2:DescribeAddresses"
+                  - "ec2:DescribeAvailabilityZones"
+                  - "ec2:DescribeClassicLinkInstances"
+                  - "ec2:DescribeCustomerGateways"
+                  - "ec2:DescribeDhcpOptions"
+                  - "ec2:DescribeEgressOnlyInternetGateways"
+                  - "ec2:DescribeFlowLogs"
+                  - "ec2:DescribeImages"
+                  - "ec2:DescribeInstances"
+                  - "ec2:DescribeInternetGateways"
+                  - "ec2:DescribeKeyPairs"
+                  - "ec2:DescribeMovingAddresses"
+                  - "ec2:DescribeNatGateways"
+                  - "ec2:DescribeNetworkAcls"
+                  - "ec2:DescribeNetworkInterfaceAttribute"
+                  - "ec2:DescribeNetworkInterfacePermissions"
+                  - "ec2:DescribeNetworkInterfaces"
+                  - "ec2:DescribePrefixLists"
+                  - "ec2:DescribeRouteTables"
+                  - "ec2:DescribeSecurityGroupReferences"
+                  - "ec2:DescribeSecurityGroups"
+                  - "ec2:DescribeStaleSecurityGroups"
+                  - "ec2:DescribeSubnets"
+                  - "ec2:DescribeTags"
+                  - "ec2:DescribeVpcAttribute"
+                  - "ec2:DescribeVpcClassicLink"
+                  - "ec2:DescribeVpcClassicLinkDnsSupport"
+                  - "ec2:DescribeVpcEndpointConnectionNotifications"
+                  - "ec2:DescribeVpcEndpointConnections"
+                  - "ec2:DescribeVpcEndpoints"
+                  - "ec2:DescribeVpcEndpointServiceConfigurations"
+                  - "ec2:DescribeVpcEndpointServicePermissions"
+                  - "ec2:DescribeVpcEndpointServices"
+                  - "ec2:DescribeVpcPeeringConnections"
+                  - "ec2:DescribeVpcs"
+                  - "ec2:DescribeVpnConnections"
+                  - "ec2:DescribeVpnGateways"
+                  - "ec2:DetachClassicLinkVpc"
+                  - "ec2:DetachInternetGateway"
+                  - "ec2:DetachNetworkInterface"
+                  - "ec2:DetachVpnGateway"
+                  - "ec2:DisableVgwRoutePropagation"
+                  - "ec2:DisableVpcClassicLink"
+                  - "ec2:DisableVpcClassicLinkDnsSupport"
+                  - "ec2:DisassociateAddress"
+                  - "ec2:DisassociateRouteTable"
+                  - "ec2:DisassociateSubnetCidrBlock"
+                  - "ec2:DisassociateVpcCidrBlock"
+                  - "ec2:EnableVgwRoutePropagation"
+                  - "ec2:EnableVpcClassicLink"
+                  - "ec2:EnableVpcClassicLinkDnsSupport"
+                  - "ec2:ModifyNetworkInterfaceAttribute"
+                  - "ec2:ModifySubnetAttribute"
+                  - "ec2:ModifyVpcAttribute"
+                  - "ec2:ModifyVpcEndpoint"
+                  - "ec2:ModifyVpcEndpointConnectionNotification"
+                  - "ec2:ModifyVpcEndpointServiceConfiguration"
+                  - "ec2:ModifyVpcEndpointServicePermissions"
+                  - "ec2:ModifyVpcPeeringConnectionOptions"
+                  - "ec2:ModifyVpcTenancy"
+                  - "ec2:MoveAddressToVpc"
+                  - "ec2:RejectVpcEndpointConnections"
+                  - "ec2:RejectVpcPeeringConnection"
+                  - "ec2:ReleaseAddress"
+                  - "ec2:ReplaceNetworkAclAssociation"
+                  - "ec2:ReplaceNetworkAclEntry"
+                  - "ec2:ReplaceRoute"
+                  - "ec2:ReplaceRouteTableAssociation"
+                  - "ec2:ResetNetworkInterfaceAttribute"
+                  - "ec2:RestoreAddressToClassic"
+                  - "ec2:RevokeSecurityGroupEgress"
+                  - "ec2:RevokeSecurityGroupIngress"
+                  - "ec2:UnassignIpv6Addresses"
+                  - "ec2:UnassignPrivateIpAddresses"
+                  - "ec2:UpdateSecurityGroupRuleDescriptionsEgress"
+                  - "ec2:UpdateSecurityGroupRuleDescriptionsIngress"
+                  - "elasticbeanstalk:CreateApplication"
+                  - "elasticbeanstalk:DeleteApplication"
+                  - "events:*"
+                Resource: !Ref AllResources
+            Version: 2012-10-17 
+  RoleCodePipeline:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: RolePipeline
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: /
+      Policies:
+        - PolicyName: PolicyPipe
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "iam:PassRole"
+                Resource: !Ref AllResources
+              - Effect: Allow
+                Action:
+                  - "ec2:*"
+                  - "cloudwatch:*"
+                  - "cloudformation:*"
+                  - "rds:*"
+                  - "s3:*"
+                  - "ecr:*"
+                Resource: !Ref AllResources
+              - Effect: Allow
+                Action: "s3:*"
+                Resource:  !Ref AllResources 
+                 
+  BucketLogs: 
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: logspipeline
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - "*"
+            AllowedMethods:
+              - GET
+              - HEAD
+              - PUT
+              - POST
+            AllowedOrigins:
+              - "*"
+            ExposedHeaders: []
+            MaxAge: 3000
+      LoggingConfiguration:
+        DestinationBucketName: logspipeline
+        LogFilePrefix: !Sub "test/documents"
+
+  # Code Pipeline.
+  Pipeline:
+    Type: "AWS::CodePipeline::Pipeline"
+    Properties:
+      Name: MyFirstPipeline
+      RoleArn: !GetAtt RoleCodePipeline.Arn
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: !Sub "Source${AppName}"
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Version: 1
+                Provider: S3
+              OutputArtifacts:
+                - Name: SourceOutput
+              Configuration:
+                S3Bucket: !If
+                  - CreateBucketArtifacts
+                  - !Ref BucketArtifacts
+                  - artifacts-021032740249
+                S3ObjectKey: !Sub "deploys/${ArtifactName}"
+                PollForSourceChanges: true
+              RunOrder: 1
+        - Name: Deploy
+          Actions:
+            - Name: CreateChangeSet
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              Configuration:
+                ActionMode: CHANGE_SET_REPLACE
+                ChangeSetName: test-deploy
+                StackName: !Join
+                  - "-"
+                  - - !Ref Environment
+                    - !Ref CountryLowercase
+                    - !Ref AppName
+                    - stack
+                Capabilities: "CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND"
+                TemplatePath: !Join
+                  - "::"
+                  - - SourceOutput
+                    - !Ref PrincipalTemplate
+                RoleArn: !GetAtt RoleCloudFormation.Arn
+                ParameterOverrides: !Sub
+                  - |-
+                    {
+                      "Environment": "${Environment}" 
+                    }
+                  - ArtifactsBucket: !If
+                      - CreateBucketArtifacts
+                      - !Ref BucketArtifacts
+                      - !Ref BucketArtifactName
+                    CustomDomainNameUser: /test/api/merchants/user/domain/name
+                    CustomDomainNameInternal: /test/api/merchants/internal/domain/name
+                    CustomDomainNameFrontAdmin: /test/api/connector/domainFront/admin/name
+                    CustomDomainNameFrontUser: /test/api/connector/domainFront/users/name
+                    VersionPsyco: !Ref VersionPsyco
+              RunOrder: 1
+              InputArtifacts:
+                - Name: SourceOutput  
+      ArtifactStore:
+        Type: S3
+        Location: !If
+          - CreateBucketArtifacts
+          - !Ref BucketArtifacts
+          - !Ref BucketArtifactName
+  
+  BucketArtifacts:
+    Condition: CreateBucketArtifacts
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: artifacts-021032740249
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LoggingConfiguration:
+        DestinationBucketName: !Ref BucketLogs
+        LogFilePrefix: test/artifacts
+  
+   

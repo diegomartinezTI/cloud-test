@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: Cognito User Pool & Clients for Authentication
+Parameters:
+  domain:
+    Type: String
+    Default: gmail.com
+
+Resources:
+  CreateSes:
+    Type: AWS::SES::EmailIdentity
+    Properties:    
+      EmailIdentity: !Ref domain
+      DkimAttributes: 
+        SigningEnabled: true
+      FeedbackAttributes: 
+        EmailForwardingEnabled: true
+      MailFromAttributes: 
+        BehaviorOnMxFailure: REJECT_MESSAGE 
+        MailFromDomain: diegomp1407@gmail.com
+ 
+  
